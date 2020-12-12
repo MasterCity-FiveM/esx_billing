@@ -6,6 +6,10 @@ RegisterServerEvent('esx_billing:sendBill')
 AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, label, amount)
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local xTarget = ESX.GetPlayerFromId(playerId)
+	if xPlayer.job.name == "police" or xPlayer.getGroup() ~= 'user' then
+		return
+	end
+	
 	amount = ESX.Math.Round(amount)
 
 	if amount > 0 and xTarget then
@@ -19,7 +23,7 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 					['@label'] = label,
 					['@amount'] = amount
 				}, function(rowsChanged)
-					xTarget.showNotification(_U('received_invoice'))
+					TriggerClientEvent("pNotify:SendNotification", source, { text = "شما یک جریمه دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 				end)
 			else
 				MySQL.Async.execute('INSERT INTO billing (identifier, sender, target_type, target, label, amount) VALUES (@identifier, @sender, @target_type, @target, @label, @amount)', {
@@ -30,7 +34,7 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 					['@label'] = label,
 					['@amount'] = amount
 				}, function(rowsChanged)
-					xTarget.showNotification(_U('received_invoice'))
+					TriggerClientEvent("pNotify:SendNotification", source, { text = "شما یک جریمه دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 				end)
 			end
 		end)
@@ -40,7 +44,7 @@ end)
 ESX.RegisterServerCallback('esx_billing:getBills', function(source, cb)
 	local xPlayer = ESX.GetPlayerFromId(source)
 
-	MySQL.Async.fetchAll('SELECT amount, id, label FROM billing WHERE identifier = @identifier', {
+	MySQL.Async.fetchAll('SELECT amount, id, label FROM billing WHERE identifier = @identifier limit 10', {
 		['@identifier'] = xPlayer.identifier
 	}, function(result)
 		cb(result)
@@ -51,7 +55,7 @@ ESX.RegisterServerCallback('esx_billing:getTargetBills', function(source, cb, ta
 	local xPlayer = ESX.GetPlayerFromId(target)
 
 	if xPlayer then
-		MySQL.Async.fetchAll('SELECT amount, id, label FROM billing WHERE identifier = @identifier', {
+		MySQL.Async.fetchAll('SELECT amount, id, label FROM billing WHERE identifier = @identifier limit 10', {
 			['@identifier'] = xPlayer.identifier
 		}, function(result)
 			cb(result)
@@ -81,8 +85,8 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 								xPlayer.removeMoney(amount)
 								xTarget.addMoney(amount)
 
-								xPlayer.showNotification(_U('paid_invoice', ESX.Math.GroupDigits(amount)))
-								xTarget.showNotification(_U('received_payment', ESX.Math.GroupDigits(amount)))
+								TriggerClientEvent("pNotify:SendNotification", xTarget.source, { text = "جریمه پرداخت شد، شما مبلغ " .. ESX.Math.GroupDigits(amount) .. "$ دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
+								TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "جریمه پرداخت شد.", type = "error", timeout = 4000, layout = "bottomCenter"})
 							end
 
 							cb()
@@ -95,15 +99,15 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 								xPlayer.removeAccountMoney('bank', amount)
 								xTarget.addAccountMoney('bank', amount)
 
-								xPlayer.showNotification(_U('paid_invoice', ESX.Math.GroupDigits(amount)))
-								xTarget.showNotification(_U('received_payment', ESX.Math.GroupDigits(amount)))
+								TriggerClientEvent("pNotify:SendNotification", xTarget.source, { text = "جریمه پرداخت شد، شما مبلغ " .. ESX.Math.GroupDigits(amount) .. "$ دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
+								TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "جریمه پرداخت شد.", type = "error", timeout = 4000, layout = "bottomCenter"})
 							end
 
 							cb()
 						end)
 					else
-						xTarget.showNotification(_U('target_no_money'))
-						xPlayer.showNotification(_U('no_money'))
+						TriggerClientEvent("pNotify:SendNotification", xTarget.source, { text = "شهروند پول کافی برای پرداخت جریمه را ندارد.", type = "error", timeout = 4000, layout = "bottomCenter"})
+						TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "شما پول کافی جهت پرداخت جریمه را ندارید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 						cb()
 					end
 				else
@@ -120,9 +124,9 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 								xPlayer.removeMoney(amount)
 								account.addMoney(amount)
 
-								xPlayer.showNotification(_U('paid_invoice', ESX.Math.GroupDigits(amount)))
+								TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "جریمه پرداخت شد.", type = "error", timeout = 4000, layout = "bottomCenter"})
 								if xTarget then
-									xTarget.showNotification(_U('received_payment', ESX.Math.GroupDigits(amount)))
+									TriggerClientEvent("pNotify:SendNotification", xTarget.source, { text = "جریمه پرداخت شد، شما مبلغ " .. ESX.Math.GroupDigits(amount) .. "$ دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 								end
 							end
 
@@ -135,10 +139,10 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 							if rowsChanged == 1 then
 								xPlayer.removeAccountMoney('bank', amount)
 								account.addMoney(amount)
-								xPlayer.showNotification(_U('paid_invoice', ESX.Math.GroupDigits(amount)))
+								TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "جریمه پرداخت شد.", type = "error", timeout = 4000, layout = "bottomCenter"})
 
 								if xTarget then
-									xTarget.showNotification(_U('received_payment', ESX.Math.GroupDigits(amount)))
+									riggerClientEvent("pNotify:SendNotification", xTarget.source, { text = "جریمه پرداخت شد، شما مبلغ " .. ESX.Math.GroupDigits(amount) .. "$ دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 								end
 							end
 
@@ -146,10 +150,10 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 						end)
 					else
 						if xTarget then
-							xTarget.showNotification(_U('target_no_money'))
+							TriggerClientEvent("pNotify:SendNotification", xTarget.source, { text = "شهروند پول کافی برای پرداخت جریمه را ندارد.", type = "error", timeout = 4000, layout = "bottomCenter"})
 						end
 
-						xPlayer.showNotification(_U('no_money'))
+						TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "شما پول کافی جهت پرداخت جریمه را ندارید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 						cb()
 					end
 				end)

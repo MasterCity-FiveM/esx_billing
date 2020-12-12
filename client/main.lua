@@ -35,7 +35,7 @@ function ShowBillsMenu()
 				menu.close()
 			end)
 		else
-			ESX.ShowNotification(_U('no_invoices'))
+			exports.pNotify:SendNotification({text = "جریمه ای موجود نیست.", type = "info", timeout = 4000})
 		end
 	end)
 end

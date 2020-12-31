@@ -6,10 +6,10 @@ RegisterServerEvent('esx_billing:sendBill')
 AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, label, amount)
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local xTarget = ESX.GetPlayerFromId(playerId)
-	if xPlayer.job.name == "police" or xPlayer.getGroup() ~= 'user' then
+	
+	if not xPlayer or xPlayer.job == nil or xPlayer.job.name == nil or xPlayer.job.name ~= "police" then
 		return
 	end
-	
 	amount = ESX.Math.Round(amount)
 
 	if amount > 0 and xTarget then
@@ -23,7 +23,8 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 					['@label'] = label,
 					['@amount'] = amount
 				}, function(rowsChanged)
-					TriggerClientEvent("pNotify:SendNotification", source, { text = "شما یک جریمه دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
+					TriggerClientEvent("pNotify:SendNotification", playerId, { text = "شما یک جریمه دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
+					TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "جریمه ثبت شد.", type = "info", timeout = 4000, layout = "bottomCenter"})
 				end)
 			else
 				MySQL.Async.execute('INSERT INTO billing (identifier, sender, target_type, target, label, amount) VALUES (@identifier, @sender, @target_type, @target, @label, @amount)', {
@@ -34,7 +35,8 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 					['@label'] = label,
 					['@amount'] = amount
 				}, function(rowsChanged)
-					TriggerClientEvent("pNotify:SendNotification", source, { text = "شما یک جریمه دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
+					TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "جریمه ثبت شد.", type = "info", timeout = 4000, layout = "bottomCenter"})
+					TriggerClientEvent("pNotify:SendNotification", playerId, { text = "شما یک جریمه دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 				end)
 			end
 		end)

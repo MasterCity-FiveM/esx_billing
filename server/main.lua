@@ -4,6 +4,7 @@ TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 
 RegisterServerEvent('esx_billing:sendBill')
 AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, label, amount)
+	ESX.RunCustomFunction("anti_ddos", source, 'esx_billing:sendBill', {playerId = playerId, sharedAccountName = sharedAccountName, label = label, amount = amount})
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local xTarget = ESX.GetPlayerFromId(playerId)
 	
@@ -44,6 +45,7 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 end)
 
 ESX.RegisterServerCallback('esx_billing:getBills', function(source, cb)
+	ESX.RunCustomFunction("anti_ddos", source, 'esx_billing:getBills', {})
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	MySQL.Async.fetchAll('SELECT amount, id, label FROM billing WHERE identifier = @identifier limit 10', {
@@ -54,6 +56,7 @@ ESX.RegisterServerCallback('esx_billing:getBills', function(source, cb)
 end)
 
 ESX.RegisterServerCallback('esx_billing:getTargetBills', function(source, cb, target)
+	ESX.RunCustomFunction("anti_ddos", source, 'esx_billing:getTargetBills', {target = target})
 	local xPlayer = ESX.GetPlayerFromId(target)
 
 	if xPlayer then
@@ -68,6 +71,7 @@ ESX.RegisterServerCallback('esx_billing:getTargetBills', function(source, cb, ta
 end)
 
 ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
+	ESX.RunCustomFunction("anti_ddos", source, 'esx_billing:payBill', {billId = billId})
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	MySQL.Async.fetchAll('SELECT sender, target_type, target, amount FROM billing WHERE id = @id', {

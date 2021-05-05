@@ -8,7 +8,7 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local xTarget = ESX.GetPlayerFromId(playerId)
 	
-	if not xPlayer or xPlayer.job == nil or xPlayer.job.name == nil or xPlayer.job.name ~= "police" then
+	if not xPlayer or xPlayer.job == nil or xPlayer.job.name == nil then
 		return
 	end
 	amount = ESX.Math.Round(amount)
@@ -24,8 +24,8 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 					['@label'] = label,
 					['@amount'] = amount
 				}, function(rowsChanged)
-					TriggerClientEvent("pNotify:SendNotification", playerId, { text = "شما یک جریمه دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
-					TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "جریمه ثبت شد.", type = "info", timeout = 4000, layout = "bottomCenter"})
+					TriggerClientEvent("pNotify:SendNotification", playerId, { text = "شما یک قبض دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
+					TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "قبض ثبت شد.", type = "info", timeout = 4000, layout = "bottomCenter"})
 				end)
 			else
 				MySQL.Async.execute('INSERT INTO billing (identifier, sender, target_type, target, label, amount) VALUES (@identifier, @sender, @target_type, @target, @label, @amount)', {
@@ -36,8 +36,8 @@ AddEventHandler('esx_billing:sendBill', function(playerId, sharedAccountName, la
 					['@label'] = label,
 					['@amount'] = amount
 				}, function(rowsChanged)
-					TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "جریمه ثبت شد.", type = "info", timeout = 4000, layout = "bottomCenter"})
-					TriggerClientEvent("pNotify:SendNotification", playerId, { text = "شما یک جریمه دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
+					TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "قبض ثبت شد.", type = "info", timeout = 4000, layout = "bottomCenter"})
+					TriggerClientEvent("pNotify:SendNotification", playerId, { text = "شما یک قبض دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 				end)
 			end
 		end)

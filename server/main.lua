@@ -148,7 +148,7 @@ ESX.RegisterServerCallback('esx_billing:payBill', function(source, cb, billId)
 								TriggerClientEvent("pNotify:SendNotification", xPlayer.source, { text = "جریمه پرداخت شد.", type = "error", timeout = 4000, layout = "bottomCenter"})
 
 								if xTarget then
-									riggerClientEvent("pNotify:SendNotification", xTarget.source, { text = "جریمه پرداخت شد، شما مبلغ " .. ESX.Math.GroupDigits(amount) .. "$ دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
+									TriggerClientEvent("pNotify:SendNotification", xTarget.source, { text = "جریمه پرداخت شد، شما مبلغ " .. ESX.Math.GroupDigits(amount) .. "$ دریافت کردید.", type = "error", timeout = 4000, layout = "bottomCenter"})
 								end
 							end
 
